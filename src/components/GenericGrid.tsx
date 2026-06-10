@@ -1,88 +1,140 @@
-import { useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import { AgGridReact } from "ag-grid-react";
 
 import {
   ModuleRegistry,
-  AllCommunityModule
+  AllCommunityModule,
 } from "ag-grid-community";
 
 import type {
   GridApi,
-  ColDef
+  ColDef,
 } from "ag-grid-community";
+
+import type {
+  GenericGridProps,
+} from "../types/GridProps";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+
+import "../styles/grid.css";
 
 ModuleRegistry.registerModules([
   AllCommunityModule,
 ]);
 
-interface GenericGridProps {
-  data: any[];
-  columns: ColDef[];
-}
-
 export default function GenericGrid({
+  title,
+  searchPlaceholder = "Search...",
   data,
   columns,
+  summaryCards = [],
+  actions = [],
 }: GenericGridProps) {
-  const gridApiRef = useRef<GridApi | null>(
-    null
-  );
+  const gridApiRef =
+    useRef<GridApi | null>(null);
 
   const [searchText, setSearchText] =
     useState("");
 
-  const [selectedColumns, setSelectedColumns] =
-    useState(
-      columns.map((x: any) => x.field)
-    );
+  const [
+    selectedRowsCount,
+    setSelectedRowsCount,
+  ] = useState(0);
 
-  const finalColumns = useMemo(() => {
-    const visibleColumns =
-      columns.filter((col: any) =>
-        selectedColumns.includes(col.field)
-      );
+  const [showColumns, setShowColumns] =
+    useState(false);
 
-    return [
-      ...visibleColumns,
+  const [
+    selectedColumns,
+    setSelectedColumns,
+  ] = useState(
+    columns
+      .filter(
+        (x: any) => x.field
+      )
+      .map(
+        (x: any) =>
+          x.field as string
+      )
+  );
 
-      {
-        headerName: "Actions",
-        field: "actions",
+  const finalColumns =
+    useMemo<ColDef[]>(() => {
+      const visibleColumns =
+        columns.filter((col) =>
+          selectedColumns.includes(
+            col.field as string
+          )
+        );
 
-        cellRenderer: (params: any) => (
-          <div
-            style={{
-              display: "flex",
-              gap: "5px",
-            }}
-          >
-            <button
-              onClick={() =>
-                alert(
-                  `View ${params.data.userName}`
-                )
-              }
+      const actionColumn: ColDef =
+        {
+          headerName: "Actions",
+
+          field: "actions",
+
+          width: 220,
+
+          sortable: false,
+
+          filter: false,
+
+          pinned: "right",
+
+          cellRenderer: (
+            params: any
+          ) => (
+            <div
+              style={{
+                display: "flex",
+                gap: "5px",
+              }}
             >
-              View
-            </button>
-
-            <button
-              onClick={() =>
-                alert(
-                  `Edit ${params.data.userName}`
+              {actions.map(
+                (action) => (
+                  <button
+                    key={
+                      action.label
+                    }
+                    className={
+                      action.className
+                    }
+                    onClick={() =>
+                      action.onClick(
+                        params.data
+                      )
+                    }
+                  >
+                    {
+                      action.label
+                    }
+                  </button>
                 )
-              }
-            >
-              Edit
-            </button>
-          </div>
-        ),
-      },
-    ];
-  }, [columns, selectedColumns]);
+              )}
+            </div>
+          ),
+        };
+
+      return [
+        ...visibleColumns,
+
+        ...(actions.length
+          ? [actionColumn]
+          : []),
+      ];
+    }, [
+      columns,
+      selectedColumns,
+      actions,
+    ]);
 
   const onSearch = (
     value: string
@@ -95,126 +147,227 @@ export default function GenericGrid({
     );
   };
 
+  const exportCSV = () => {
+    gridApiRef.current?.exportDataAsCsv();
+  };
+
+  const refreshGrid = () => {
+    gridApiRef.current?.refreshCells();
+  };
+
+  useEffect(() => {
+    const resizeHandler = () => {
+      gridApiRef.current?.sizeColumnsToFit();
+    };
+
+    window.addEventListener(
+      "resize",
+      resizeHandler
+    );
+
+    return () =>
+      window.removeEventListener(
+        "resize",
+        resizeHandler
+      );
+  }, []);
+
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100vh",
-        padding: "20px",
-      }}
-    >
-      <h2>
-        Enterprise Generic Grid
-      </h2>
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">
+          {title}
+        </h1>
 
-      {/* Toolbar */}
-
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          marginBottom: "15px",
-          flexWrap: "wrap",
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchText}
-          onChange={(e) =>
-            onSearch(e.target.value)
-          }
-          style={{
-            padding: "8px",
-            width: "250px",
-          }}
-        />
-
-        <button
-          onClick={() =>
-            gridApiRef.current?.exportDataAsCsv()
-          }
-        >
-          Export CSV
-        </button>
+        <p className="page-subtitle">
+          Enterprise Generic Grid
+        </p>
       </div>
 
-      {/* Column Selector */}
+      <div className="summary-container">
+        {summaryCards.map(
+          (card) => (
+            <div
+              className="summary-card"
+              key={card.title}
+            >
+              <h4>
+                {card.title}
+              </h4>
 
-      <div
-        style={{
-          marginBottom: "15px",
-        }}
-      >
-        <strong>
-          Select Columns:
-        </strong>
+              <h2>
+                {card.value}
+              </h2>
+            </div>
+          )
+        )}
 
-        <br />
+        <div className="summary-card">
+          <h4>
+            Selected Rows
+          </h4>
 
-        {columns.map((col: any) => (
-          <label
-            key={col.field}
-            style={{
-              marginRight: "15px",
-            }}
-          >
+          <h2>
+            {selectedRowsCount}
+          </h2>
+        </div>
+      </div>
+
+      <div className="grid-card">
+        <div className="toolbar">
+          <div className="toolbar-left">
             <input
-              type="checkbox"
-              checked={selectedColumns.includes(
-                col.field
-              )}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setSelectedColumns(
-                    [
-                      ...selectedColumns,
-                      col.field,
-                    ]
-                  );
-                } else {
-                  setSelectedColumns(
-                    selectedColumns.filter(
-                      (x) =>
-                        x !== col.field
-                    )
-                  );
-                }
-              }}
+              className="search-box"
+              placeholder={
+                searchPlaceholder
+              }
+              value={searchText}
+              onChange={(e) =>
+                onSearch(
+                  e.target.value
+                )
+              }
             />
+          </div>
 
-            {col.headerName}
-          </label>
-        ))}
-      </div>
+          <div className="toolbar-right">
+            <button
+              className="btn btn-primary"
+              onClick={exportCSV}
+            >
+              Export CSV
+            </button>
 
-      <div
-        className="ag-theme-quartz"
-        style={{
-          width: "100%",
-          height: "700px",
-        }}
-      >
-        <AgGridReact
-          rowData={data}
-          columnDefs={finalColumns}
-          pagination={true}
-          paginationPageSize={10}
-          rowSelection={{
-            mode: "multiRow",
+            <button
+              className="btn btn-success"
+              onClick={refreshGrid}
+            >
+              Refresh
+            </button>
+
+            <button
+              className="btn btn-secondary"
+              onClick={() =>
+                setShowColumns(
+                  !showColumns
+                )
+              }
+            >
+              Columns
+            </button>
+          </div>
+        </div>
+
+        {showColumns && (
+          <div className="column-selector">
+            <strong>
+              Select Columns
+            </strong>
+
+            <br />
+            <br />
+
+            {columns.map(
+              (col) => (
+                <label
+                  key={
+                    col.field as string
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedColumns.includes(
+                      col.field as string
+                    )}
+                    onChange={(
+                      e
+                    ) => {
+                      if (
+                        e.target
+                          .checked
+                      ) {
+                        setSelectedColumns(
+                          [
+                            ...selectedColumns,
+                            col.field as string,
+                          ]
+                        );
+                      } else {
+                        setSelectedColumns(
+                          selectedColumns.filter(
+                            (
+                              x
+                            ) =>
+                              x !==
+                              col.field
+                          )
+                        );
+                      }
+                    }}
+                  />
+
+                  {col.headerName}
+                </label>
+              )
+            )}
+          </div>
+        )}
+
+        <div
+          className="ag-theme-quartz"
+          style={{
+            width: "100%",
+            height:
+              "calc(100vh - 320px)",
+            minHeight: "650px",
           }}
-          animateRows={true}
-          defaultColDef={{
-            sortable: true,
-            filter: true,
-            resizable: true,
-            floatingFilter: true,
-          }}
-          onGridReady={(params) => {
-            gridApiRef.current =
-              params.api;
-          }}
-        />
+        >
+          <AgGridReact
+            rowData={data}
+            columnDefs={
+              finalColumns
+            }
+            pagination={true}
+            paginationPageSize={10}
+            paginationPageSizeSelector={[
+              10,
+              25,
+              50,
+              100,
+            ]}
+            rowHeight={45}
+            headerHeight={50}
+            animateRows={true}
+            rowSelection={{
+              mode:
+                "multiRow",
+            }}
+            defaultColDef={{
+              sortable: true,
+              filter: true,
+              resizable: true,
+              floatingFilter: true,
+            }}
+            onSelectionChanged={() => {
+              const rows =
+                gridApiRef.current?.getSelectedRows();
+
+              setSelectedRowsCount(
+                rows?.length || 0
+              );
+            }}
+            onGridReady={(
+              params
+            ) => {
+              gridApiRef.current =
+                params.api;
+
+              setTimeout(() => {
+                params.api.sizeColumnsToFit();
+              }, 100);
+            }}
+          />
+        </div>
       </div>
     </div>
   );
