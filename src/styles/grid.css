@@ -28,8 +28,7 @@
 
 .summary-container {
   display: grid;
-  grid-template-columns:
-    repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -39,8 +38,7 @@
   border-radius: 16px;
   padding: 20px;
   border: 1px solid #e5e7eb;
-  box-shadow:
-    0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 .summary-card h4 {
@@ -61,8 +59,7 @@
   border-radius: 18px;
   padding: 20px;
   border: 1px solid #e5e7eb;
-  box-shadow:
-    0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 .toolbar {
@@ -88,10 +85,13 @@
   border-radius: 12px;
   padding: 0 14px;
   outline: none;
+  font-size: 14px;
+  transition: border-color 0.2s;
 }
 
 .search-box:focus {
   border-color: #1677ff;
+  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
 }
 
 .btn {
@@ -102,6 +102,21 @@
   cursor: pointer;
   color: white;
   font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-primary {
@@ -122,34 +137,123 @@
   padding: 15px;
   border-radius: 12px;
   margin-bottom: 16px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.column-selector strong {
+  display: block;
+  margin-bottom: 12px;
+  color: #1f2937;
+  font-size: 14px;
 }
 
 .column-selector label {
   margin-right: 20px;
   display: inline-block;
   margin-bottom: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
 }
 
-.view-btn {
+.column-selector input[type="checkbox"] {
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.pagination-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pagination-buttons button {
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.pagination-buttons button:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.pagination-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pagination-controls select {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.pagination-controls select:focus {
+  outline: none;
+  border-color: #1677ff;
+}
+
+/* Action Buttons */
+.action-btn-default {
+  padding: 6px 12px;
   background: #1677ff;
   color: white;
   border: none;
-  padding: 7px 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
-.edit-btn {
-  background: #16a34a;
-  color: white;
-  border: none;
-  padding: 7px 12px;
-  border-radius: 8px;
-  cursor: pointer;
+.action-btn-default:hover {
+  background: #0956d0;
 }
 
-/* AG GRID */
+.action-btn-default:focus-visible {
+  outline: 2px solid #1677ff;
+  outline-offset: 2px;
+}
 
+/* AG Grid Customization */
 .ag-theme-quartz {
   --ag-border-color: #e5e7eb;
   --ag-header-background-color: #f8fafc;
@@ -161,8 +265,181 @@
 
 .ag-theme-quartz .ag-header {
   font-weight: 600;
+  background: #f8fafc;
 }
 
 .ag-theme-quartz .ag-root-wrapper {
   border-radius: 12px;
+}
+
+.ag-theme-quartz .ag-row-selected {
+  background: #dbeafe !important;
+}
+
+.ag-theme-quartz .ag-cell {
+  border-color: #e5e7eb;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .toolbar {
+    gap: 12px;
+  }
+
+  .search-box {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .toolbar-right {
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 0 14px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .summary-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .summary-card {
+    padding: 16px;
+  }
+
+  .summary-card h2 {
+    font-size: 20px;
+  }
+
+  .grid-card {
+    padding: 16px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .column-selector {
+    padding: 12px;
+  }
+
+  .column-selector label {
+    display: block;
+    margin-bottom: 8px;
+    margin-right: 0;
+  }
+
+  .pagination-controls {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .pagination-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pagination-info {
+    width: 100%;
+    text-align: center;
+  }
+
+  .pagination-controls select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    padding: 12px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .summary-container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .grid-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .toolbar {
+    gap: 10px;
+  }
+
+  .search-box {
+    height: 40px;
+    font-size: 13px;
+  }
+
+  .btn {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .pagination-buttons button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .action-btn-default {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
